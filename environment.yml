@@ -1,0 +1,11 @@
+name: forceatlas2_env
+channels:
+  - defaults
+dependencies:
+  - python=3.10
+  - cython
+  - numpy
+  - scipy
+  - pandas
+  - networkx
+  - pip
