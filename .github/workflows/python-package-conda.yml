@@ -19,15 +19,19 @@ jobs:
         echo "CONDA_BIN=$CONDA/bin" >> $GITHUB_ENV
         echo "$CONDA_BIN" >> $GITHUB_PATH
 
-    - name: Install dependencies
+    - name: Create Conda environment
       run: |
-        conda env create --file environment.yml
+        conda create --name forceatlas2_env --file environment.yml
+
+    - name: Activate Conda environment
+      run: |
+        source $CONDA_BIN/activate forceatlas2_env
 
     - name: Lint with flake8
       run: |
-        conda run --name forceatlas2_env flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-        conda run --name forceatlas2_env flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
 
     - name: Test with pytest
       run: |
-        conda run --name forceatlas2_env pytest
+        pytest
