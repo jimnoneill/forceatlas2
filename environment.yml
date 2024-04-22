@@ -1,4 +1,4 @@
-#name: forceatlas2_env
+name: forceatlas2_env
 channels:
   - defaults
 dependencies:
