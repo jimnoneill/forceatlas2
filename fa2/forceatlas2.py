@@ -30,6 +30,34 @@ from .fa2util import Node
 
 from concurrent.futures import ThreadPoolExecutor
 
+def setup_node(G, pos, i, isSparse):
+    n = fa2util.Node()
+    if isSparse:
+        n.mass = 1 + len(G.rows[i])
+    else:
+        n.mass = 1 + numpy.count_nonzero(G[i])
+    n.old_dx = 0
+    n.old_dy = 0
+    n.dx = 0
+    n.dy = 0
+    if pos is None:
+        n.x = random.random()
+        n.y = random.random()
+    else:
+        n.x = pos[i][0]
+        n.y = pos[i][1]
+    return n
+
+def setup_edge(e):
+    if e[1] <= e[0]:
+        return None  # Skip duplicate edges or adjust according to actual logic
+    edge = fa2util.Edge()
+    edge.node1 = e[0]  # Index of the first node in the edge
+    edge.node2 = e[1]  # Index of the second node in the edge
+    # More properties like edge weight can be set here if needed
+    return edge
+
+
 
 class Timer:
     def __init__(self, name="Timer"):
@@ -143,34 +171,6 @@ class ForceAtlas2:
                 edges.append(edge)
 
         return nodes, edges
-
-    def setup_node(G, pos, i, isSparse):
-        n = fa2util.Node()
-        if isSparse:
-            n.mass = 1 + len(G.rows[i])
-        else:
-            n.mass = 1 + numpy.count_nonzero(G[i])
-        n.old_dx = 0
-        n.old_dy = 0
-        n.dx = 0
-        n.dy = 0
-        if pos is None:
-            n.x = random.random()
-            n.y = random.random()
-        else:
-            n.x = pos[i][0]
-            n.y = pos[i][1]
-        return n
-
-    def setup_edge(e):
-        if e[1] <= e[0]:
-            return None  # Skip duplicate edges or adjust according to actual logic
-        edge = fa2util.Edge()
-        edge.node1 = e[0]  # Index of the first node in the edge
-        edge.node2 = e[1]  # Index of the second node in the edge
-        # More properties like edge weight can be set here if needed
-        return edge
-
 
     # Given an adjacency matrix, this function computes the node positions
     # according to the ForceAtlas2 layout algorithm.  It takes the same
