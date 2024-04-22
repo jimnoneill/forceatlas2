@@ -16,9 +16,8 @@ jobs:
 
     - name: Initialize Conda
       run: |
-        echo "source $CONDA/bin/activate" >> $GITHUB_ENV
-        source $CONDA/bin/activate
-        conda info --envs
+        echo "CONDA_BIN=$CONDA/bin" >> $GITHUB_ENV
+        echo "$CONDA_BIN" >> $GITHUB_PATH
 
     - name: Install dependencies
       run: |
