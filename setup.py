@@ -44,14 +44,14 @@ print(">>>> Starting to install!\n")
 
 setup(
     name='fa2',
-    version='0.3.5',
-    description='The fastest ForceAtlas2 algorithm for Python (and NetworkX)',
+    version='0.3.5-j',
+    description='The fastest (now multi-threaded!) ForceAtlas2 algorithm for Python (and NetworkX)',
     long_description_content_type='text/markdown',
     long_description=long_description,
-    author='Bhargav Chippada',
-    author_email='bhargavchippada19@gmail.com',
-    url='https://github.com/bhargavchippada/forceatlas2',
-    download_url='https://github.com/bhargavchippada/forceatlas2/archive/v0.3.5.tar.gz',
+    author='Bhargav Chippada; maintained branch by Jamey ONeill',
+    author_email='joneilliii@sdsu.edu',
+    url='https://github.com/jimnoneill/forceatlas2',
+    #download_url='https://github.com/bhargavchippada/forceatlas2/archive/v0.3.5.tar.gz',
     keywords=['forceatlas2', 'networkx', 'force-directed-graph', 'force-layout', 'graph'],
     packages=['fa2'],
     classifiers=[
@@ -62,7 +62,7 @@ setup(
 
         'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
 
-        'Programming Language :: Python :: 2',
+        #'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 3'
     ],
     install_requires=['numpy', 'scipy', 'tqdm'],

@@ -1,6 +1,7 @@
 ## ForceAtlas2 for Python
 
-A port of Gephi's Force Atlas 2 layout algorithm to Python 2 and Python 3 (with a wrapper for NetworkX and igraph). This is the fastest python implementation available with most of the features complete. It also supports Barnes Hut approximation for maximum speedup.
+
+Branched version of bhargavchippada's implementation for compatibility withthe newest version of NetworkX AND this branch has multiThread=True option implemented. ~A port of Gephi's Force Atlas 2 layout algorithm to Python 2 and Python 3 (with a wrapper for NetworkX and igraph). This is the fastest python implementation available with most of the features complete. It also supports Barnes Hut approximation for maximum speedup.
 
 ForceAtlas2 is a very fast layout algorithm for force-directed graphs. It's used to spatialize a **weighted undirected** graph in 2D (Edge weight defines the strength of the connection). The implementation is based on this [paper](http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0098679) and the corresponding [gephi-java-code](https://github.com/gephi/gephi/blob/master/modules/LayoutPlugin/src/main/java/org/gephi/layout/plugin/forceAtlas2/ForceAtlas2.java). Its really quick compared to the fruchterman reingold algorithm (spring layout) of networkx and scales well to high number of nodes (>10000).
 
@@ -13,9 +14,9 @@ ForceAtlas2 is a very fast layout algorithm for force-directed graphs. It's used
 
 ## Installation
 
-Install from pip:
+To install the package from my fork of `forceatlas2`, use the following command:
 
-    pip install fa2
+    pip install git+https://github.com/jimnoneill/forceatlas2.git
 
 To build and install run from source:
 
@@ -86,7 +87,7 @@ forceatlas2 = ForceAtlas2(
                         jitterTolerance=1.0,  # Tolerance
                         barnesHutOptimize=True,
                         barnesHutTheta=1.2,
-                        multiThreaded=False,  # NOT IMPLEMENTED
+                        multiThreaded=True,  # YES IMPLEMENTED
 
                         # Tuning
                         scalingRatio=2.0,

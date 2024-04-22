@@ -26,6 +26,9 @@ import scipy
 from tqdm import tqdm
 
 from . import fa2util
+from .fa2util import Node
+
+from concurrent.futures import ThreadPoolExecutor
 
 
 class Timer:
@@ -65,7 +68,7 @@ class ForceAtlas2:
 
                  # Log
                  verbose=True):
-        assert linLogMode == adjustSizes == multiThreaded == False, "You selected a feature that has not been implemented yet..."
+        assert linLogMode == adjustSizes == False, "You selected a feature that has not been implemented yet..."
         self.outboundAttractionDistribution = outboundAttractionDistribution
         self.linLogMode = linLogMode
         self.adjustSizes = adjustSizes
@@ -79,14 +82,15 @@ class ForceAtlas2:
         self.verbose = verbose
 
     def init(self,
-             G,  # a graph in 2D numpy ndarray format (or) scipy sparse matrix format
-             pos=None  # Array of initial positions
-             ):
+            G,  # a graph in 2D numpy ndarray format (or) scipy sparse matrix format
+            pos=None,  # Array of initial positions
+            multiThreaded=False  # Flag to enable multithreading
+            ):
         isSparse = False
         if isinstance(G, numpy.ndarray):
             # Check our assumptions
             assert G.shape == (G.shape[0], G.shape[0]), "G is not 2D square"
-            assert numpy.all(G.T == G), "G is not symmetric.  Currently only undirected graphs are supported"
+            assert numpy.all(G.T == G), "G is not symmetric. Currently only undirected graphs are supported"
             assert isinstance(pos, numpy.ndarray) or (pos is None), "Invalid node positions"
         elif scipy.sparse.issparse(G):
             # Check our assumptions
@@ -97,38 +101,76 @@ class ForceAtlas2:
         else:
             assert False, "G is not numpy ndarray or scipy sparse matrix"
 
-        # Put nodes into a data structure we can understand
-        nodes = []
-        for i in range(0, G.shape[0]):
-            n = fa2util.Node()
-            if isSparse:
-                n.mass = 1 + len(G.rows[i])
-            else:
-                n.mass = 1 + numpy.count_nonzero(G[i])
-            n.old_dx = 0
-            n.old_dy = 0
-            n.dx = 0
-            n.dy = 0
-            if pos is None:
-                n.x = random.random()
-                n.y = random.random()
-            else:
-                n.x = pos[i][0]
-                n.y = pos[i][1]
-            nodes.append(n)
+        if multiThreaded:
+            # Multithreaded setup for nodes
+            with ThreadPoolExecutor() as executor:
+                nodes = list(executor.map(lambda i: setup_node(G, pos, i, isSparse), range(G.shape[0])))
 
-        # Put edges into a data structure we can understand
-        edges = []
-        es = numpy.asarray(G.nonzero()).T
-        for e in es:  # Iterate through edges
-            if e[1] <= e[0]: continue  # Avoid duplicate edges
-            edge = fa2util.Edge()
-            edge.node1 = e[0]  # The index of the first node in `nodes`
-            edge.node2 = e[1]  # The index of the second node in `nodes`
-            edge.weight = G[tuple(e)]
-            edges.append(edge)
+            # Multithreaded setup for edges
+            with ThreadPoolExecutor() as executor:
+                edges = list(executor.map(setup_edge, numpy.asarray(G.nonzero()).T))
+            edges = [edge for edge in edges if edge is not None]  # Filter out None results if any
+        else:
+            # Single-threaded setup for nodes
+            nodes = []
+            for i in range(0, G.shape[0]):
+                n = fa2util.Node()
+                if isSparse:
+                    n.mass = 1 + len(G.rows[i])
+                else:
+                    n.mass = 1 + numpy.count_nonzero(G[i])
+                n.old_dx = 0
+                n.old_dy = 0
+                n.dx = 0
+                n.dy = 0
+                if pos is None:
+                    n.x = random.random()
+                    n.y = random.random()
+                else:
+                    n.x = pos[i][0]
+                    n.y = pos[i][1]
+                nodes.append(n)
+
+            # Single-threaded setup for edges
+            edges = []
+            es = numpy.asarray(G.nonzero()).T
+            for e in es:
+                if e[1] <= e[0]: continue  # Avoid duplicate edges
+                edge = fa2util.Edge()
+                edge.node1 = e[0]
+                edge.node2 = e[1]
+                edge.weight = G[tuple(e)]
+                edges.append(edge)
 
         return nodes, edges
+
+    def setup_node(G, pos, i, isSparse):
+        n = fa2util.Node()
+        if isSparse:
+            n.mass = 1 + len(G.rows[i])
+        else:
+            n.mass = 1 + numpy.count_nonzero(G[i])
+        n.old_dx = 0
+        n.old_dy = 0
+        n.dx = 0
+        n.dy = 0
+        if pos is None:
+            n.x = random.random()
+            n.y = random.random()
+        else:
+            n.x = pos[i][0]
+            n.y = pos[i][1]
+        return n
+
+    def setup_edge(e):
+        if e[1] <= e[0]:
+            return None  # Skip duplicate edges or adjust according to actual logic
+        edge = fa2util.Edge()
+        edge.node1 = e[0]  # Index of the first node in the edge
+        edge.node2 = e[1]  # Index of the second node in the edge
+        # More properties like edge weight can be set here if needed
+        return edge
+
 
     # Given an adjacency matrix, this function computes the node positions
     # according to the ForceAtlas2 layout algorithm.  It takes the same
@@ -245,7 +287,7 @@ class ForceAtlas2:
             or (cynetworkx and isinstance(G, cynetworkx.classes.graph.Graph))
         ), "Not a networkx graph"
         assert isinstance(pos, dict) or (pos is None), "pos must be specified as a dictionary, as in networkx"
-        M = networkx.to_scipy_sparse_matrix(G, dtype='f', format='lil', weight=weight_attr)
+        M = networkx.to_scipy_sparse_array(G, dtype='f', format='lil', weight=weight_attr)
         if pos is None:
             l = self.forceatlas2(M, pos=None, iterations=iterations)
         else:
