@@ -11,3 +11,4 @@ dependencies:
   - pip
   - flake8
   - pytest
+  - tqdm
