@@ -1,4 +1,4 @@
-from forceatlas2 import ForceAtlas2
+from fa2 import ForceAtlas2
 
 def test_forceatlas2_initialization():
     # Example usage of ForceAtlas2 based on the provided notebook
