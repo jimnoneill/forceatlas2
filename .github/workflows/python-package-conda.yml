@@ -22,16 +22,12 @@ jobs:
     - name: Install dependencies
       run: |
         conda env create --file environment.yml
-        echo "conda activate forceatlas2_env" >> $GITHUB_ENV
-
 
     - name: Lint with flake8
       run: |
-        conda install -n myenv flake8
-        conda run -n myenv flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-        conda run -n myenv flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+        conda run --name forceatlas2_env flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+        conda run --name forceatlas2_env flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
 
     - name: Test with pytest
       run: |
-        conda install -n myenv pytest
-        conda run -n myenv pytest
+        conda run --name forceatlas2_env pytest
