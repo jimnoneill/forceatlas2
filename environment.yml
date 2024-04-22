@@ -1,4 +1,3 @@
-#name: forceatlas2_env
 channels:
   - defaults
 dependencies:
