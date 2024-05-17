@@ -42,7 +42,9 @@ To build and install run from source:
 
 ## Usage
 
+```
 from fa2 import ForceAtlas2
+```
 
 Create a ForceAtlas2 object with the appropriate settings. ForceAtlas2 class contains three important methods:
 ```python
